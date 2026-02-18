@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undertale Launcher</title>
+    <style>
+        :root {
+            --primary-color-1: #667eea;
+            --primary-color-2: #764ba2;
+            --accent-color: #ff6b6b;
+            --text-color: #333;
+            --light-text: #666;
+            --background-light: #f5f5f5;
+            --border-color: #ddd;
+            --success-color: #4caf50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-color: linear-gradient(135deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%) #f1f1f1;
+            scrollbar-width: thin;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--light-text);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .theme-label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .theme-preset {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-preset:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-preset.active {
+            border-color: var(--text-color);
+            transform: scale(1.15);
+        }
+
+        .custom-color-inputs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-input-group label {
+            font-size: 0.85em;
+            color: var(--light-text);
+            min-width: 80px;
+        }
+
+        .color-input-group input {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        #searchBox {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        #searchBox:focus {
+            outline: none;
+            border-color: var(--primary-color-1);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .download-all-btn {
+            background: linear-gradient(135deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .clear-cache-btn {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .clear-cache-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .storage-info {
+            text-align: center;
+            color: var(--light-text);
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .game-count {
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .game-button {
+            background: linear-gradient(135deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            word-wrap: break-word;
+            word-break: break-word;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .game-button:active {
+            transform: translateY(-2px);
+        }
+
+        .game-button.downloading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .game-button.cached::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: var(--success-color);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .no-games {
+            text-align: center;
+            color: var(--light-text);
+            padding: 40px;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--primary-color-1);
+            padding: 20px;
+            font-size: 1.1em;
+        }
+
+        .info {
+            background: #f0f4ff;
+            border-left: 4px solid var(--primary-color-1);
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 5px;
+            color: var(--text-color);
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .info strong {
+            color: var(--primary-color-1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color-1) 0%, var(--primary-color-2) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 MHI Games</h1>
+        <p class="subtitle">Select a game to play</p>
+        
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+            <span class="theme-label">🎨 Theme:</span>
+            <div class="theme-preset active" id="themeDefault" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Default Purple"></div>
+            <div class="theme-preset" id="themeDark" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);" title="Dark Blue"></div>
+            <div class="theme-preset" id="themeNeon" style="background: linear-gradient(135deg, #00d4ff 0%, #ff006e 100%);" title="Neon"></div>
+            <div class="theme-preset" id="themeForest" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);" title="Forest Green"></div>
+            <div class="theme-preset" id="themeSunset" style="background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);" title="Sunset"></div>
+            <div class="theme-preset" id="themeOcean" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Ocean"></div>
+        </div>
+
+        <!-- Custom Color Input -->
+        <div class="custom-color-inputs">
+            <div class="color-input-group">
+                <label for="customColor1">Primary 1:</label>
+                <input type="color" id="customColor1" value="#667eea">
+            </div>
+            <div class="color-input-group">
+                <label for="customColor2">Primary 2:</label>
+                <input type="color" id="customColor2" value="#764ba2">
+            </div>
+            <div class="color-input-group">
+                <label for="customAccent">Accent:</label>
+                <input type="color" id="customAccent" value="#ff6b6b">
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchBox" placeholder="🔍 Search games..." />
+        </div>
+
+        <div class="control-buttons">
+            <button class="control-btn download-all-btn" id="downloadAllBtn">⬇️ Download All Games</button>
+            <button class="control-btn clear-cache-btn" id="clearCacheBtn">🗑️ Clear Cache</button>
+        </div>
+
+        <div class="storage-info">
+            <span id="storageInfo">Loading storage info...</span>
+        </div>
+
+        <div class="game-count">
+            <span id="gameCountText">Loading...</span>
+        </div>
+        
+        <div id="gamesContainer" class="games-grid">
+            <div class="loading">Loading games...</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ How it works:</strong><br>
+            • Games are downloaded and stored locally on your computer<br>
+            • Click "Download All Games" to cache all games (first time only)<br>
+            • Once cached, games run instantly from your computer<br>
+            • A checkmark (✓) shows which games are downloaded<br>
+            • Use "Clear Cache" to free up space<br>
+            • Internet connection only needed for initial download<br>
+            • 🎨 Customize colors above!
+        </div>
+    </div>
+
+    <script>
+        // IndexedDB setup for larger storage capacity
+        const DB_NAME = 'MHIGamesDB';
+        const STORE_NAME = 'games';
+        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/jrexj/web-port/undertale-yellow/';
+
+        let db = null;
+        let filteredGames = [];
+
+        // Theme presets
+        const themes = {
+            default: { color1: '#667eea', color2: '#764ba2', accent: '#ff6b6b' },
+            dark: { color1: '#1a1a2e', color2: '#16213e', accent: '#e94560' },
+            neon: { color1: '#00d4ff', color2: '#ff006e', accent: '#00ff88' },
+            forest: { color1: '#11998e', color2: '#38ef7d', accent: '#ff6b6b' },
+            sunset: { color1: '#ff6b6b', color2: '#ffd93d', accent: '#ff006e' },
+            ocean: { color1: '#0077be', color2: '#00a8e8', accent: '#00c9ff' }
+        };
+
+        // Configuration - All your games
+        const GAMES_LIST = [
+            { name: 'undertale', filename: 'index.html' },
+         
+        ];
+
+        // Apply theme
+        function applyTheme(color1, color2, accent) {
+            document.documentElement.style.setProperty('--primary-color-1', color1);
+            document.documentElement.style.setProperty('--primary-color-2', color2);
+            document.documentElement.style.setProperty('--accent-color', accent);
+            
+            // Save to localStorage
+            localStorage.setItem('mhiTheme', JSON.stringify({ color1, color2, accent }));
+        }
+
+        // Load saved theme
+        function loadSavedTheme() {
+            const saved = localStorage.getItem('mhiTheme');
+            if (saved) {
+                const { color1, color2, accent } = JSON.parse(saved);
+                applyTheme(color1, color2, accent);
+                document.getElementById('customColor1').value = color1;
+                document.getElementById('customColor2').value = color2;
+                document.getElementById('customAccent').value = accent;
+            }
+        }
+
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        database.createObjectStore(STORE_NAME, { keyPath: 'filename' });
+                    }
+                };
+            });
+        }
+
+        // Get game from storage
+        function getGameFromStorage(filename) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(filename);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        // Save game to storage
+        function saveGameToStorage(filename, htmlContent) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put({ filename, content: htmlContent, timestamp: Date.now() });
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        // Check if game is cached
+        async function isGameCached(filename) {
+            const game = await getGameFromStorage(filename);
+            return !!game;
+        }
+
+        // Get storage size
+        function getStorageSize() {
+            return new Promise((resolve, reject) => {
+                if (navigator.storage && navigator.storage.estimate) {
+                    navigator.storage.estimate().then(estimate => {
+                        const usedMB = (estimate.usage / 1024 / 1024).toFixed(2);
+                        const quotaMB = (estimate.quota / 1024 / 1024).toFixed(2);
+                        resolve({ used: usedMB, quota: quotaMB });
+                    }).catch(reject);
+                } else {
+                    resolve({ used: '?', quota: '?' });
+                }
+            });
+        }
+
+        // Update storage info
+        async function updateStorageInfo() {
+            try {
+                const size = await getStorageSize();
+                document.getElementById('storageInfo').textContent = 
+                    `Storage: ${size.used} MB / ${size.quota} MB used`;
+            } catch (error) {
+                console.error('Error getting storage info:', error);
+            }
+        }
+
+        // Open game
+        async function openGame(gameName, filename) {
+            try {
+                let htmlContent = null;
+                
+                const cached = await getGameFromStorage(filename);
+                if (cached) {
+                    htmlContent = cached.content;
+                } else {
+                    const response = await fetch(GITHUB_RAW_URL + filename);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${filename}`);
+                    }
+                    htmlContent = await response.text();
+                    await saveGameToStorage(filename, htmlContent);
+                }
+
+                const newWindow = window.open('', '_blank');
+                if (!newWindow) {
+                    throw new Error('Failed to open window. Disable popup blocker.');
+                }
+                
+                newWindow.document.open();
+                newWindow.document.write(htmlContent);
+                newWindow.document.close();
+                newWindow.document.title = gameName + ' - Undertale';
+
+                await renderGames();
+                
+            } catch (error) {
+                console.error('Error opening game:', error);
+                alert(`⚠️ Failed to load ${gameName}\n\nError: ${error.message}`);
+            }
+        }
+
+        // Download all games
+        async function downloadAllGames() {
+            const downloadBtn = document.getElementById('downloadAllBtn');
+            const progressFill = document.getElementById('progressFill');
+            
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '⬇️ Downloading...';
+            
+            let successCount = 0;
+            const total = GAMES_LIST.length;
+            
+            for (let i = 0; i < GAMES_LIST.length; i++) {
+                const game = GAMES_LIST[i];
+                try {
+                    const cached = await getGameFromStorage(game.filename);
+                    if (!cached) {
+                        const response = await fetch(GITHUB_RAW_URL + game.filename);
+                        if (response.ok) {
+                            const htmlContent = await response.text();
+                            await saveGameToStorage(game.filename, htmlContent);
+                            successCount++;
+                        }
+                    } else {
+                        successCount++;
+                    }
+                } catch (error) {
+                    console.error(`Failed to download ${game.name}:`, error);
+                }
+                
+                const progress = ((i + 1) / total) * 100;
+                progressFill.style.width = progress + '%';
+            }
+            
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = `✅ Downloaded ${successCount}/${total} Games`;
+            
+            await updateStorageInfo();
+            await renderGames();
+            
+            setTimeout(() => {
+                downloadBtn.textContent = '⬇️ Download All Games';
+            }, 3000);
+        }
+
+        // Clear cache
+        async function clearCache() {
+            if (confirm('Are you sure you want to delete all cached games?')) {
+                try {
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    store.clear();
+                    
+                    await new Promise((resolve, reject) => {
+                        transaction.oncomplete = resolve;
+                        transaction.onerror = reject;
+                    });
+                    
+                    alert('✅ Cache cleared!');
+                    await updateStorageInfo();
+                    await renderGames();
+                } catch (error) {
+                    alert('❌ Error clearing cache: ' + error.message);
+                }
+            }
+        }
+
+        // Search games
+        function filterGames(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            
+            if (term === '') {
+                filteredGames = [...GAMES_LIST];
+            } else {
+                filteredGames = GAMES_LIST.filter(game => 
+                    game.name.toLowerCase().includes(term)
+                );
+            }
+            
+            renderGames();
+        }
+
+        // Render games
+        async function renderGames() {
+            const container = document.getElementById('gamesContainer');
+            const countText = document.getElementById('gameCountText');
+            
+            if (filteredGames.length === 0) {
+                container.innerHTML = `
+                    <div class="no-games" style="grid-column: 1 / -1;">
+                        No games found. Try a different search!
+                    </div>
+                `;
+                countText.textContent = 'No games found';
+                return;
+            }
+
+            container.innerHTML = '';
+            countText.textContent = `Showing ${filteredGames.length} of ${GAMES_LIST.length} games`;
+            
+            for (const game of filteredGames) {
+                const button = document.createElement('button');
+                button.className = 'game-button';
+                button.textContent = game.name;
+                
+                const isCached = await isGameCached(game.filename);
+                if (isCached) {
+                    button.classList.add('cached');
+                }
+                
+                button.onclick = () => {
+                    openGame(game.name, game.filename);
+                };
+                button.title = isCached ? 
+                    `Click to play ${game.name} (cached)` : 
+                    `Click to play ${game.name} (will download)`;
+                
+                container.appendChild(button);
+            }
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                // Load saved theme first
+                loadSavedTheme();
+                
+                await initDB();
+                filteredGames = [...GAMES_LIST];
+                await renderGames();
+                await updateStorageInfo();
+                
+                // Setup search box
+                const searchBox = document.getElementById('searchBox');
+                searchBox.addEventListener('input', (e) => {
+                    filterGames(e.target.value);
+                });
+
+                // Setup buttons
+                document.getElementById('downloadAllBtn').addEventListener('click', downloadAllGames);
+                document.getElementById('clearCacheBtn').addEventListener('click', clearCache);
+
+                // Setup theme presets
+                document.getElementById('themeDefault').addEventListener('click', () => {
+                    applyTheme(themes.default.color1, themes.default.color2, themes.default.accent);
+                    updateThemeButtons('themeDefault');
+                });
+                document.getElementById('themeDark').addEventListener('click', () => {
+                    applyTheme(themes.dark.color1, themes.dark.color2, themes.dark.accent);
+                    updateThemeButtons('themeDark');
+                });
+                document.getElementById('themeNeon').addEventListener('click', () => {
+                    applyTheme(themes.neon.color1, themes.neon.color2, themes.neon.accent);
+                    updateThemeButtons('themeNeon');
+                });
+                document.getElementById('themeForest').addEventListener('click', () => {
+                    applyTheme(themes.forest.color1, themes.forest.color2, themes.forest.accent);
+                    updateThemeButtons('themeForest');
+                });
+                document.getElementById('themeSunset').addEventListener('click', () => {
+                    applyTheme(themes.sunset.color1, themes.sunset.color2, themes.sunset.accent);
+                    updateThemeButtons('themeSunset');
+                });
+                document.getElementById('themeOcean').addEventListener('click', () => {
+                    applyTheme(themes.ocean.color1, themes.ocean.color2, themes.ocean.accent);
+                    updateThemeButtons('themeOcean');
+                });
+
+                // Setup custom color inputs
+                document.getElementById('customColor1').addEventListener('input', (e) => {
+                    const color1 = e.target.value;
+                    const color2 = document.getElementById('customColor2').value;
+                    const accent = document.getElementById('customAccent').value;
+                    applyTheme(color1, color2, accent);
+                    updateThemeButtons(null);
+                });
+                document.getElementById('customColor2').addEventListener('input', (e) => {
+                    const color1 = document.getElementById('customColor1').value;
+                    const color2 = e.target.value;
+                    const accent = document.getElementById('customAccent').value;
+                    applyTheme(color1, color2, accent);
+                    updateThemeButtons(null);
+                });
+                document.getElementById('customAccent').addEventListener('input', (e) => {
+                    const color1 = document.getElementById('customColor1').value;
+                    const color2 = document.getElementById('customColor2').value;
+                    const accent = e.target.value;
+                    applyTheme(color1, color2, accent);
+                    updateThemeButtons(null);
+                });
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Error initializing launcher: ' + error.message);
+            }
+        }
+
+        function updateThemeButtons(activeId) {
+            document.querySelectorAll('.theme-preset').forEach(preset => {
+                preset.classList.remove('active');
+            });
+            if (activeId) {
+                document.getElementById(activeId).classList.add('active');
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
